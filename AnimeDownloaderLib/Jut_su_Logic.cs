@@ -29,7 +29,10 @@ namespace AnimeDownloaderLib
             this.driver=FirefoxDriverInit();
         }
 
-        public bool Fill(ObservableCollection<IAnimeItem> observableCollection, int NumberOfElements=30)
+        private int _animeCount=1;
+        private int _seasonCount = 1;
+        private int _elementCount = 1;
+        public bool Fill(List<IAnimeItem> observableCollection, int NumberOfElements)
         {
             if (driver != null)
             {
@@ -37,14 +40,21 @@ namespace AnimeDownloaderLib
 
                 IncreaseNumberOfElements(NumberOfElements);
 
-                var animeItems = FillAnime();
-                foreach(var anime in animeItems)
+                var animeItems = FillAnime(NumberOfElements);
+                foreach(var animeItem in animeItems)
                 {
-                    anime. = new ObservableCollection<ISeasonItem>(FillSeasons(anime));
+                    driver.Navigate().GoToUrl(animeItem.Path);
+                    animeItem.SeasonsItems = new ObservableCollection<ISeasonItem>(FillSeasons(animeItem));
+                    var seasons = animeItem.SeasonsItems;
+                    foreach(var seasonItem in seasons)
+                    {
+                        seasonItem.ElementItems = new ObservableCollection<IElementItem>(FillElements(seasonItem));
+                    }
+
+                    observableCollection.Add(animeItem);
                 }
 
-
-                driver.Navigate().GoToUrl(startPage);
+                driver.Navigate().GoToUrl(googlePage);
                 return true;
             }
 
@@ -53,7 +63,7 @@ namespace AnimeDownloaderLib
 
         private void IncreaseNumberOfElements(int NumberOfElements)
         {
-            int num = (NumberOfElements / 30)-1;
+            int num = (int)Math.Round((double)((NumberOfElements / 30)-1),MidpointRounding.ToPositiveInfinity);
             IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
 
             for (int i = 0; i < num; i++)
@@ -79,7 +89,7 @@ namespace AnimeDownloaderLib
             }
         }
 
-        private IAnimeItem[] FillAnime()
+        private IAnimeItem[] FillAnime(int NumberOfElements)
         {
             List<IAnimeItem> animeLst = new List<IAnimeItem>();
 
@@ -87,6 +97,7 @@ namespace AnimeDownloaderLib
 
             Regex URIregx = new Regex("https://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?", RegexOptions.IgnoreCase);
 
+            var count = 1;
             foreach (var animeElement in animeElements)
             {
                 var name = animeElement.FindElement(By.ClassName("aaname")).Text;
@@ -97,11 +108,18 @@ namespace AnimeDownloaderLib
                 imageURI = match == null?"":match.Value;
 
                 var obj=Injector.GetObject<IAnimeItem>();
+                obj.Id = _animeCount;
+                _animeCount++;
                 obj.Title = name;
                 obj.Path = path;
                 obj.ImageURI = imageURI;
 
                 animeLst.Add(obj);
+                if (count >= NumberOfElements)
+                {
+                    break;
+                }
+                count++;
             }
 
             return animeLst.ToArray();
@@ -109,24 +127,89 @@ namespace AnimeDownloaderLib
 
         private ISeasonItem[] FillSeasons(IAnimeItem anime)
         {
-            List<ISeasonItem> animeLst = new List<ISeasonItem>();
+            List<ISeasonItem> seasonLst = new List<ISeasonItem>();
 
-            var animeElements = driver.FindElements(By.CssSelector("div[id^='anime_fs_']"));
+            var seasonElements = driver.FindElements(By.ClassName("the-anime-season"));
 
-            foreach (var animeElement in animeElements)
+            var count = 1;
+
+            foreach (var seasonElement in seasonElements)
             {
-                var name = animeElement.FindElement(By.ClassName("aaname")).Text;
-                var path = animeElement.FindElement(By.TagName("a")).GetAttribute("href");
+                var isFilms = false;
+                if(seasonElement.Text== "Полнометражные фильмы")
+                {
+                    isFilms = true;
+                }
+                var name = seasonElement.Text;
 
                 var obj = Injector.GetObject<ISeasonItem>();
+                obj.Id = _seasonCount;
+                _seasonCount++;
                 obj.Title = name;
-                obj.Path = path;
+                obj.IsFilms= isFilms;
+                obj.Order= count;
+                obj.Path = anime.Path;
 
-                animeLst.Add(obj);
+                seasonLst.Add(obj);
+                count++;
             }
-
-            return animeLst.ToArray();
+            return seasonLst.ToArray();
         }
+        private IElementItem[] FillElements(ISeasonItem season)
+        {
+            List<IElementItem> seasonLst = new List<IElementItem>();
 
+            var elements = driver.FindElements(By.ClassName("video"));
+            Regex seasonRegx = new Regex(@"season-(\d\d*)");
+            Regex episodeRegx = new Regex(@"episode-(\d\d*)");
+            if (season.IsFilms)
+            {
+                episodeRegx = new Regex(@"film-(\d\d*)");
+            }
+            var count = 1;
+            foreach (var element in elements)
+            {
+                var path = element.GetAttribute("href");
+                if (path != "")
+                {
+                    if (!season.IsFilms)
+                    {
+                        var match = seasonRegx.Match(path).Groups;
+                        var seasonName = season.Title;
+                        if (match.Count > 1)
+                        {
+                            seasonName = match[1].Value;
+                        }
+                        if (season.Order.ToString() == seasonName)
+                        {
+                            var name = episodeRegx.Match(path).Groups[1].Value;
+
+                            var obj = Injector.GetObject<IElementItem>();
+                            obj.Id = _elementCount;
+                            _elementCount++;
+                            obj.Title = name;
+                            obj.Path = path;
+                            obj.Order = count;
+
+                            seasonLst.Add(obj);
+                            count++;
+                        }
+                    }
+                    else
+                    {
+                        var name = episodeRegx.Match(path).Groups;
+                        if (name.Count > 1)
+                        {
+                            var obj = Injector.GetObject<IElementItem>();
+                            obj.Title = name[1].Value;
+                            obj.Path = path;
+
+                            seasonLst.Add(obj);
+                        }
+                    }
+                }
+            }
+            return seasonLst.ToArray();
+        }
     }
 }

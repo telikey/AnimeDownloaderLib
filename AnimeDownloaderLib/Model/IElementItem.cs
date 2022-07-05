@@ -13,7 +13,11 @@ namespace AnimeDownloaderLib.Model
 
         public string Title { get; set; }
 
+        public int Order { get; set; }
+
+        public bool CanDownload { get; set; }
         public string Path { get; set; }
+        public string DownloadPath { get; set; }
     }
 }
 

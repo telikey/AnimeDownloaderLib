@@ -13,6 +13,10 @@ namespace AnimeDownloaderLib.Model
 
         public string Title { get; set; }
 
+        public int Order { get; set; }
+
+        public bool IsFilms { get; set; }
+
         public string Path { get; set; }
         public ObservableCollection<IElementItem> ElementItems { get; set; }
     }

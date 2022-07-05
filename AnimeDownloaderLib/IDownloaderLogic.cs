@@ -10,6 +10,7 @@ namespace AnimeDownloaderLib
 {
     public interface IDownloaderLogic<TItem>
     {
-        bool Fill(ObservableCollection<IAnimeItem> observableCollection,int NumberOfElements = 30) { return false; }
+        bool Fill(List<IAnimeItem> observableCollection, int NumberOfElements);
+
     }
 }
