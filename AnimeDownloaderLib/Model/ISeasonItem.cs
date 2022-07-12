@@ -17,6 +17,8 @@ namespace AnimeDownloaderLib.Model
 
         public bool IsFilms { get; set; }
 
+        public bool CanDownload { get; }
+
         public string Path { get; set; }
         public ObservableCollection<IElementItem> ElementItems { get; set; }
     }

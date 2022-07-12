@@ -15,6 +15,8 @@ namespace AnimeDownloaderLib.Model
 
         public string Path { get; set; }
         public string ImageURI { get; set; }
+
+        public bool CanDownload { get; }
         public ObservableCollection<ISeasonItem> SeasonsItems { get; set; }
     }
 }
