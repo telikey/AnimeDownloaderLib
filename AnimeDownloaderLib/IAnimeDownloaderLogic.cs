@@ -1,4 +1,6 @@
 ﻿using AnimeDownloaderLib.Model;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Firefox;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +12,8 @@ namespace AnimeDownloaderLib
 {
     public interface IAnimeDownloaderLogic
     {
-        List<IAnimeItem> FillAnime(int NumberOfElements);
+        void Init();
+        List<IAnimeItem> FillAnime(int skipNumberofElements,int NumberOfElements);
         List<ISeasonItem> FillSeasons(List<IAnimeItem> observableAnimeCollection);
         List<IElementItem> FillElements(List<ISeasonItem> observableSeasonCollection);
         void DownloadElements(List<IElementItem> observableSeasonCollection, string folderPath);

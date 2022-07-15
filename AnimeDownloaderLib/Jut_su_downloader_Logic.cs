@@ -1,4 +1,5 @@
-﻿using AnimeDownloaderLib.Model;
+﻿using AnimeDownloaderLib.Exceptions;
+using AnimeDownloaderLib.Model;
 using ClassInjector;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Firefox;
@@ -13,33 +14,24 @@ using System.Threading.Tasks;
 
 namespace AnimeDownloaderLib
 {
-    public class Jut_su_downloader_Logic: IAnimeDownloaderLogic
+    public class Jut_su_downloader_Logic : AnimeDownloaderLogicBase
     {
 
         private readonly string startPage = @"https://jut.su/anime/";
-        private readonly string geckoDriverFolder = @"C:\temp\downloader";
-        private readonly string geckoDriverName = @"geckodriver.exe";
-        private readonly string binary = @"C:\Program Files (x86)\Mozilla Firefox\firefox.exe";
-        private IWebDriver driver=null;
 
         public readonly DownloaderType DownloaderType = DownloaderType.Jut_su;
 
-        public Jut_su_downloader_Logic()
-        {
-            this.driver=FirefoxDriverInit();
-        }
-
-        public List<IAnimeItem> FillAnime(int NumberOfElements)
+        public override List<IAnimeItem> FillAnime(int skipNumberofElements, int NumberOfElements)
         {
             if (driver != null)
             {
                 GoToPage(startPage);
 
-                IncreaseNumberOfElements(NumberOfElements);
+                IncreaseNumberOfElements(skipNumberofElements+NumberOfElements);
 
                 List<IAnimeItem> animeLst = new List<IAnimeItem>();
 
-                var animeElements = driver.FindElements(By.CssSelector("div[id^='anime_fs_']"));
+                var animeElements = driver.FindElements(By.CssSelector("div[id^='anime_fs_']")).Skip(skipNumberofElements);
 
                 Regex URIregx = new Regex("https://([\\w+?\\.\\w+])+([a-zA-Z0-9\\~\\!\\@\\#\\$\\%\\^\\&amp;\\*\\(\\)_\\-\\=\\+\\\\\\/\\?\\.\\:\\;\\'\\,]*)?", RegexOptions.IgnoreCase);
 
@@ -68,10 +60,10 @@ namespace AnimeDownloaderLib
                 }
                 return animeLst;
             }
-            throw new Exception();
+            throw new DriverNotInited();
         }
 
-        public List<ISeasonItem> FillSeasons(List<IAnimeItem> observableAnimeCollection)
+        public override List<ISeasonItem> FillSeasons(List<IAnimeItem> observableAnimeCollection)
         {
             if (driver != null)
             {
@@ -109,10 +101,10 @@ namespace AnimeDownloaderLib
                 }
                 return seasonLst;
             }
-            throw new Exception();
+            throw new DriverNotInited();
         }
 
-        public List<IElementItem> FillElements(List<ISeasonItem> observableSeasonCollection)
+        public override List<IElementItem> FillElements(List<ISeasonItem> observableSeasonCollection)
         {
             if (driver != null)
             {
@@ -210,7 +202,18 @@ namespace AnimeDownloaderLib
                 }
                 return seasonLst;
             }
-            throw new Exception();
+            throw new DriverNotInited();
+        }
+
+        public override void DownloadElements(List<IElementItem> observableElementsCollection, string folderPath)
+        {
+            foreach (var elementItem in observableElementsCollection)
+            {
+                using (var client = new WebClient())
+                {
+                    client.DownloadFile(elementItem.DownloadPath, Path.Combine(folderPath, elementItem.Title));
+                }
+            }
         }
 
         private void GoToPage(string path)
@@ -227,17 +230,6 @@ namespace AnimeDownloaderLib
                 catch
                 {
                     Thread.Sleep(500);
-                }
-            }
-        }
-
-        public void DownloadElements(List<IElementItem> observableElementsCollection, string folderPath)
-        {
-            foreach(var elementItem in observableElementsCollection)
-            {
-                using (var client = new WebClient())
-                {
-                    client.DownloadFile(elementItem.DownloadPath, Path.Combine(folderPath,elementItem.Title));
                 }
             }
         }
@@ -285,22 +277,6 @@ namespace AnimeDownloaderLib
             {
                 js.ExecuteScript("window.scrollTo(0, document.body.scrollHeight);");
                 Thread.Sleep(500);
-            }
-        }
-
-        private IWebDriver FirefoxDriverInit()
-        {
-            var service = FirefoxDriverService.CreateDefaultService(geckoDriverFolder, geckoDriverName);
-            service.FirefoxBinaryPath = binary;
-            service.HideCommandPromptWindow = true;
-
-            try
-            {
-                return new FirefoxDriver(service);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
             }
         }
     }
