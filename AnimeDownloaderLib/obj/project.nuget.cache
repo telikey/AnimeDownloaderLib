@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "HBCiXd1ZZexmi41pIZ3liPLyX6DZCw6jbsYGjRB1UvNMmsy4vL2l1FxM3tM4Q1TuEMTPm5RjLvedlTdJgP9aTw==",
+  "dgSpecHash": "EmVlxLG+56cxIPtxzEnxXf2/tdf5CjqbcZt9ttpBs446gW/Rgb4v3l3e90/G8El31/ReCr4e5P6forRpCDYPaw==",
   "success": true,
-  "projectFilePath": "C:\\git\\Loc\\AnimeDownloaderLib\\AnimeDownloaderLib\\AnimeDownloaderLib.csproj",
+  "projectFilePath": "C:\\Users\\Admin\\Desktop\\AnimeDownloaderLib\\AnimeDownloaderLib\\AnimeDownloaderLib.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\kzolotarev\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
-    "C:\\Users\\kzolotarev\\.nuget\\packages\\selenium.firefox.webdriver\\0.27.0\\selenium.firefox.webdriver.0.27.0.nupkg.sha512",
-    "C:\\Users\\kzolotarev\\.nuget\\packages\\selenium.webdriver\\4.3.0\\selenium.webdriver.4.3.0.nupkg.sha512",
-    "C:\\Users\\kzolotarev\\.nuget\\packages\\selenium.webdriver.chromedriver\\103.0.5060.5300\\selenium.webdriver.chromedriver.103.0.5060.5300.nupkg.sha512"
+    "C:\\Users\\Admin\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\selenium.firefox.webdriver\\0.27.0\\selenium.firefox.webdriver.0.27.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\selenium.webdriver\\4.3.0\\selenium.webdriver.4.3.0.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\selenium.webdriver.chromedriver\\103.0.5060.5300\\selenium.webdriver.chromedriver.103.0.5060.5300.nupkg.sha512"
   ],
   "logs": []
 }
